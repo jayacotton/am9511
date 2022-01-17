@@ -5,3 +5,5 @@ back to decimal.
 Used to creat the constant hex value for PI ..  40490fdb
 
 
+I am provideing iotest.asm in case you need to modify the i/o addresses or change
+the way the program works.
