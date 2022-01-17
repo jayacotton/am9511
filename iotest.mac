@@ -119,12 +119,15 @@ init	equ	$
 ;
 ;   AMwrt on entry hl -> a floating point number
 ;    a and c get mangled
+;   clobbers de
 ;
 AMwrt	equ	$
 	call	AMWait
+	lxi	d,3
+	dad	d
 	mvi	c,4
 AMw1	mov	a,m
-	inx	h
+	dcx	h
 	out	APUDr
 	dcr	c
 	jnz	AMw1
@@ -132,13 +135,16 @@ AMw1	mov	a,m
 ;
 ;  AMred on entry hl -> output buffer for floating point number
 ;   a and c get mangled
+;  clobbers de
 ;
 AMred	equ	$
 	call	AMWait
+	lxi	d,3
+	dad	d
 	mvi	c,4
 AMr1	in	APUDr
 	mov	m,a
-	inx	h
+	dcx	h
 	dcr	c
 	jnz	AMr1
 	ret
