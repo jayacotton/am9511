@@ -20,15 +20,16 @@ extern unsigned char image[MAXBUF];
 
 #ifdef __SDCC
 #define ASM __asm
+#define ENDASM __asmend;
 #else
 #define ASM #asm
-#endif
-
-#ifdef __SDCC
-#define ENDASM __asmend
-#else
 #define ENDASM #endasm
 #endif
+
+ASM
+        GLOBAL init_floatpack
+init_floatpack: ret
+ENDASM
 
 #define MATH_DATA_PORT	0x42
 #define MATH_CTRL_PORT	0x43
@@ -123,21 +124,12 @@ unsigned long
 dec2flt (char *c)
 {
   sscanf (c, "%f", &fl);	/* IEEE-754 */
-  printf ("\ndec2flt %s %f %08lx ", c, fl, fl);
+  printf ("\ndec2flt %s %f %lx ", c, fl, fl);
 /* *INDENT-OFF* */
-/* convert fl to am9511-float format */
-#if __MATH_MATH32
 ASM
+/* convert fl to am9511-float format */
 	ld	hl,(_fl)
 	ld	de,(_fl+2)
-ENDASM
-#else
-ASM
-	ld	hl,(_fl+2)
-	ld	de,(_fl+4)
-ENDASM
-#endif
-ASM
 	ld	(_hl),hl
 	ld	(_de),de
 	ld	(_bc),bc
@@ -228,7 +220,7 @@ ASM
 	in	a,(MATH_STATUS_PORT)
 ; from z88dk am32_popf.asm
 	and 07ch                    ; errors from status register
-    jr NZ,errors
+    jp NZ,errors
 
     sla e                       ; remove leading 1 from mantissa
 
@@ -246,11 +238,11 @@ ASM
 .errors
     rrca                        ; relocate status bits (just for convenience)
     bit 5,a                     ; zero
-    jr NZ,_zero
+    jp NZ,_zero
     bit 1,a
-    jr NZ,infinity              ; overflow
+    jp NZ,infinity              ; overflow
     bit 2,a
-    jr NZ,_zero                  ; underflow
+    jp NZ,_zero                  ; underflow
 
 .nan
     rl d                        ; get sign
@@ -265,24 +257,15 @@ ASM
     rr d                        ; nan exponent
     ld hl,0                     ; nan mantissa
 ._done1
-ENDASM
-#if __MATH_MATH32
-ASM
-	ld	(_fl),hl
-	ld	(_fl+2),de
-ENDASM
-#else
-ASM
 	ld	(_fl+2),hl
 	ld	(_fl+4),de
 ENDASM
-#endif
 /* *INDENT-ON* */
   /* convert IEEE-754 to decimal string */
-  sprintf (&text, "%f", fl);
+  sprintf (text, "%f", fl);
 printf("\n");
-snapmem(&fl,&fl,6,4,"fl ");
-  printf ("%s %f %8lx\n", text, fl, fl);
+snapmem(&fl,&fl,6,0x24,"fl ");
+  printf ("%s %f %lx\n", text, fl, fl);
   return (text);
 }
 
@@ -447,6 +430,11 @@ void
 SIMPLE_ADD ()
 {
   reset_9511 ();
+printf("%s\n",flt2dec(0x03a00000));
+printf("%s\n",flt2dec(0x07f60000));
+printf("%s\n",flt2dec(0x7dfbe76c));
+printf("%s\n",flt2dec(0x819df3b6));
+exit(0);
   printf ("confidence %s\n", flt2dec (dec2flt ("5.0")));
   printf ("%8lx\n", dec2flt ("5."));
   printf ("%8lx\n", dec2flt ("5"));

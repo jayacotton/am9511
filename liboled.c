@@ -14,15 +14,12 @@ extern void oled_clean ();
 
 #ifdef __SDCC
 #define ASM __asm
+#define ENDASM __endasm;
 #else
 #define ASM #asm
-#endif
-
-#ifdef __SDCC
-#define ENDASM __asmend
-#else
 #define ENDASM #endasm
 #endif
+
 
 unsigned char image[MAXBUF];
 #define CELLSIZE (MAXHEIGHT)
@@ -275,3 +272,12 @@ oled_init ()
       oled_command (*p++);
     }
 }
+/* */
+
+
+
+
+
+
+
+
