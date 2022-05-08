@@ -1,3 +1,5 @@
+This repo is to support S100computers Math_board v1.0
+
 dec2flt.c is a "C" program that converts Interegers to floating point
 format.   The limiting factor for this program is ATOL, it can't deal with
 floating point format.
